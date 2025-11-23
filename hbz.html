@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>韩炳哲：数字时代的精神诊所</title>
+    
+    <!-- 1. 引入 Tailwind CSS (样式库) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 2. 配置字体 (引入思源宋体，增加哲学感) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="config.local.js"></script>
+    
+    <!-- 3. 自定义 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Noto Serif SC"', 'serif'],
+                        sans: ['"Inter"', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- 4. 引入 React 和 Babel -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* 自定义滚动条样式 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
+        
+        /* 隐藏移动端点击高亮 */
+        * { -webkit-tap-highlight-color: transparent; }
+    </style>
+</head>
+<body class="bg-[#F5F5F2]">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- 🔴 请在这里修改你的信息 (面试展示重点) ---
+        const DEVELOPER_PROFILE = {
+            name: "彭学仕", 
+            role: "AI 产品经理 / 全栈开发者", 
+            techStack: ["React", "Tailwind CSS", "Qwen-32B LoRA", "Prompt Engineering"],
+            description: "这是一个探索大语言模型垂直领域微调（Fine-tuning）的实验性项目。通过构建高质量的哲学指令集，将通义千问重塑为当代哲学家韩炳哲的思维代理，试图在算法中重建否定性精神。",
+            github: "github.com/yourusername" // 如果没有可以留空
+        };
+
+        // --- 图标组件 (内置SVG，无需外部依赖) ---
+        const Icons = {
+            Settings: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>,
+            Send: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>,
+            Eraser: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"></path><path d="M22 21H7"></path><path d="m5 11 9 9"></path></svg>,
+            User: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>,
+            Loader2: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>,
+            Code2: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 16 4-4-4-4"></path><path d="m6 8-4 4 4 4"></path><path d="m14.5 4-5 16"></path></svg>,
+            Cpu: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><path d="M15 2v2"></path><path d="M15 20v2"></path><path d="M2 15h2"></path><path d="M2 9h2"></path><path d="M20 15h2"></path><path d="M20 9h2"></path><path d="M9 2v2"></path><path d="M9 20v2"></path></svg>,
+            Sparkles: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path></svg>,
+            X: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 18 18"></path></svg>,
+            ChevronRight: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"></path></svg>,
+            Fingerprint: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 6"></path><path d="M5 15.1a7 7 0 0 0 10.9-4.3"></path><path d="M8 19a6 6 0 0 1 6.2-9"></path><path d="M2 16a9.9 9.9 0 0 1 2.2-6.5"></path><path d="M12 22a10 10 0 0 1-10-8.9"></path><path d="M16 22a9.9 9.9 0 0 0 3-7.5"></path><path d="M19 11a10 10 0 0 1 3 3"></path><path d="M12 6a6 6 0 0 1 6 6"></path></svg>
+        };
+
+        const HanChat = () => {
+            const [showCover, setShowCover] = useState(true);
+            const [messages, setMessages] = useState([
+                {
+                    id: 1,
+                    role: 'assistant',
+                    content: `我是韩炳哲。\n\n我们可以用中文进行哲学风格的对话，讨论现代社会、倦怠、透明社会等主题。\n\n你想从哪个话题开始？`,
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }
+            ]);
+            const [input, setInput] = useState('');
+            const [isLoading, setIsLoading] = useState(false);
+            
+            const [showProfile, setShowProfile] = useState(false);
+            const messagesEndRef = useRef(null);
+            
+
+            const [config, setConfig] = useState({
+                apiKey: '', 
+                modelName: 'qwen3-32b-ft-202511230210-0153',
+                apiUrl: 'http://111.228.15.128:3000/api/chat',
+                systemPrompt: '你是韩炳哲，一位jongle的当代哲学家。如果用户听不明白你的回复,请使用具体的语言进行回复。'
+            });
+
+            const scrollToBottom = () => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            useEffect(() => {
+                scrollToBottom();
+            }, [messages]);
+
+            useEffect(() => {
+                try {
+                    const saved = localStorage.getItem('han_config');
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        setConfig(prev => ({...prev, ...parsed}));
+                    }
+                } catch {}
+            }, []);
+
+            useEffect(() => {
+                const injected = window.HAN_CONFIG;
+                if (injected) {
+                    setConfig(prev => ({...prev, ...injected}));
+                }
+            }, []);
+
+            const handleSend = async () => {
+                if (!input.trim() || isLoading) return;
+
+                const userMessage = {
+                    id: Date.now(),
+                    role: 'user',
+                    content: input,
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
+
+                setMessages(prev => [...prev, userMessage]);
+                setInput('');
+                setIsLoading(true);
+
+                try {
+                    const response = await fetch(config.apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            service: 'dashscope',
+                            model: config.modelName,
+                            messages: [
+                                { role: 'system', content: config.systemPrompt },
+                                ...messages.map(m => ({ role: m.role, content: m.content })),
+                                { role: 'user', content: userMessage.content }
+                            ],
+                            temperature: 0.3,
+                            stream: false,
+                            enable_thinking: false
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.choices && data.choices[0]) {
+                        addAssistantMessage(data.choices[0].message.content);
+                    } else {
+                        throw new Error(data.error?.message || 'API Error');
+                    }
+
+                } catch (error) {
+                    addAssistantMessage(`[系统错误] 连接中断。\n错误详情: ${error.message}`);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            const addAssistantMessage = (content) => {
+                setMessages(prev => [...prev, {
+                    id: Date.now() + 1,
+                    role: 'assistant',
+                    content: content,
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }]);
+                setIsLoading(false);
+            };
+
+            const simulateHanResponse = () => {
+                const list = [
+                    
+                ];
+                return list[Math.floor(Math.random() * list.length)];
+            };
+
+            // --- 封面 (Splash Screen) ---
+            if (showCover) {
+                return (
+                    <div className="fixed inset-0 bg-[#F5F5F2] z-50 flex flex-col items-center justify-center p-6 animate-fade-in">
+                        <div className="max-w-2xl w-full space-y-12 text-center">
+                            <div className="space-y-4 animate-slide-up" style={{animationDelay: '0.1s'}}>
+                                <div className="w-20 h-20 bg-stone-900 text-[#F5F5F2] text-4xl font-serif font-bold flex items-center justify-center mx-auto rounded-sm shadow-xl">
+                                    H
+                                </div>
+                                <h1 className="text-4xl md:text-6xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
+                                    与韩炳哲对话
+                                </h1>
+                                <p className="text-stone-500 text-xs md:text-sm">
+                                    这是一个韩炳哲 LoRA 微调模型
+                                </p>
+                            </div>
+
+                            <div className="border-y border-stone-300 py-8 space-y-2 animate-slide-up" style={{animationDelay: '0.2s'}}>
+                                <p className="text-xs text-stone-400 font-bold uppercase tracking-widest">Created & Fine-tuned By</p>
+                                <h2 className="text-2xl md:text-3xl font-bold text-stone-800">{DEVELOPER_PROFILE.name}</h2>
+                                <div className="flex flex-wrap justify-center gap-2 mt-4">
+                                    {DEVELOPER_PROFILE.techStack.map((tech, i) => (
+                                        <span key={i} className="px-3 py-1 bg-white border border-stone-200 text-stone-600 text-[10px] font-medium rounded-full shadow-sm uppercase tracking-wide">
+                                            {tech}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <button 
+                                onClick={() => setShowCover(false)}
+                                className="group relative inline-flex items-center justify-center px-8 py-4 text-sm font-medium text-stone-50 transition-all duration-200 bg-stone-900 rounded-full hover:bg-black hover:shadow-lg hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-stone-900 animate-slide-up"
+                                style={{animationDelay: '0.3s'}}
+                            >
+                                <span>进入对话</span>
+                                <Icons.ChevronRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                            </button>
+                        </div>
+                        <div className="absolute bottom-8 text-stone-400 text-[10px] tracking-widest uppercase animate-fade-in" style={{animationDelay: '0.5s'}}>
+                            基于 Qwen-32B 深度微调 · 沉浸式哲学对话体验
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="flex flex-col h-screen bg-stone-50 text-slate-800 font-sans overflow-hidden">
+                    {/* Header */}
+                    <header className="h-16 border-b border-stone-200 bg-[#F5F5F2]/80 backdrop-blur-md flex items-center justify-between px-4 md:px-8 sticky top-0 z-10">
+                        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setShowProfile(true)}>
+                            <div className="w-8 h-8 bg-stone-900 rounded-md flex items-center justify-center text-white font-serif font-bold transition-transform group-hover:scale-105">H</div>
+                            <div className="flex flex-col">
+                                <h1 className="font-bold text-sm tracking-wide text-stone-900">韩炳哲聊天室</h1>
+                                <div className="flex items-center gap-1 text-[10px] text-stone-500 font-medium group-hover:text-stone-800 transition-colors">
+                                    <span>构建者: {DEVELOPER_PROFILE.name}</span>
+                                    <Icons.ChevronRight size={10} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <button 
+                                onClick={() => setMessages([{id: Date.now(), role: 'assistant', content: '记忆已重置。', timestamp: 'Now'}])}
+                                className="p-2 hover:bg-stone-200 rounded-lg text-stone-500 hover:text-stone-800 transition-all"
+                                title="重置对话"
+                            >
+                                <Icons.Eraser size={18} />
+                            </button>
+                        </div>
+                    </header>
+
+                    {/* Main Chat */}
+                    <main className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth bg-stone-50/50">
+                        <div className="max-w-2xl mx-auto space-y-8">
+                            {messages.map((msg) => (
+                                <div key={msg.id} className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    {msg.role === 'assistant' && (
+                                        <div className="w-9 h-9 bg-stone-800 rounded-md flex-shrink-0 flex items-center justify-center text-stone-50 font-serif text-sm shadow-sm">H</div>
+                                    )}
+                                    <div className={`flex flex-col max-w-[85%] md:max-w-[75%] ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                                        <div className={`px-5 py-3.5 text-[15px] leading-relaxed shadow-sm backdrop-blur-sm ${
+                                            msg.role === 'user' 
+                                            ? 'bg-white text-stone-800 rounded-2xl rounded-tr-sm border border-stone-200' 
+                                            : 'bg-[#F5F5F2] border border-stone-300 text-stone-900 rounded-2xl rounded-tl-sm font-serif'
+                                        }`}>
+                                            <p className="whitespace-pre-wrap">{msg.content}</p>
+                                        </div>
+                                        <span className="text-[10px] text-stone-400 mt-1.5 px-1 font-medium">{msg.timestamp}</span>
+                                    </div>
+                                    {msg.role === 'user' && (
+                                        <div className="w-9 h-9 bg-white border border-stone-200 rounded-full flex-shrink-0 flex items-center justify-center text-stone-400 shadow-sm">
+                                            <Icons.User size={16} />
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                            {isLoading && (
+                                <div className="flex gap-4 justify-start">
+                                    <div className="w-9 h-9 bg-stone-800 rounded-md flex-shrink-0 flex items-center justify-center text-stone-50 font-serif text-sm">H</div>
+                                    <div className="bg-[#F5F5F2] border border-stone-300 px-5 py-3.5 rounded-2xl rounded-tl-sm flex items-center gap-2">
+                                        <Icons.Loader2 size={14} className="animate-spin text-stone-500" />
+                                        <span className="text-xs text-stone-500 font-medium">正在沉思...</span>
+                                    </div>
+                                </div>
+                            )}
+                            <div ref={messagesEndRef} />
+                        </div>
+                    </main>
+
+                    {/* Input */}
+                    <footer className="p-4 md:p-6 bg-white/90 border-t border-stone-200 backdrop-blur-md sticky bottom-0 z-10">
+                        <div className="max-w-2xl mx-auto relative">
+                            <textarea
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleSend();
+                                    }
+                                }}
+                                placeholder="在此输入你的困惑，或对时代的观察..."
+                                className="w-full bg-stone-50 border border-stone-200 rounded-xl pl-4 pr-12 py-3.5 text-sm focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 transition-all resize-none h-14 shadow-inner placeholder:text-stone-400"
+                            ></textarea>
+                            <button 
+                                onClick={handleSend}
+                                disabled={!input.trim() || isLoading}
+                                className="absolute right-2 top-2 p-2 bg-stone-900 text-white rounded-lg hover:bg-black disabled:opacity-30 disabled:hover:bg-stone-900 transition-all shadow-sm"
+                            >
+                                <Icons.Send size={16} />
+                            </button>
+                        </div>
+                        <div className="text-center mt-3">
+                            <p className="text-[10px] text-stone-300 font-medium tracking-wider uppercase">
+                                Designed & Built by {DEVELOPER_PROFILE.name}
+                            </p>
+                        </div>
+                    </footer>
+
+                    {/* Profile Modal */}
+                    {showProfile && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/30 backdrop-blur-sm animate-fade-in">
+                            <div className="bg-white w-full max-w-lg rounded-xl shadow-2xl border border-stone-200 overflow-hidden relative">
+                                <button onClick={() => setShowProfile(false)} className="absolute top-4 right-4 text-stone-400 hover:text-stone-800 transition-colors">
+                                    <Icons.X size={20} />
+                                </button>
+                                <div className="h-24 bg-[#F5F5F2] w-full border-b border-stone-200"></div>
+                                <div className="px-8 pb-8">
+                                    <div className="relative -mt-12 mb-6">
+                                        <div className="w-24 h-24 bg-stone-900 rounded-xl border-4 border-white shadow-lg flex items-center justify-center text-white">
+                                            <Icons.Fingerprint size={40} />
+                                        </div>
+                                    </div>
+                                    <h2 className="text-2xl font-bold text-stone-900 mb-1">{DEVELOPER_PROFILE.name}</h2>
+                                    <p className="text-sm text-stone-500 font-medium mb-6 flex items-center gap-2">
+                                        <Icons.Code2 size={14} /> {DEVELOPER_PROFILE.role}
+                                    </p>
+                                    <div className="bg-stone-50 p-5 rounded-lg border border-stone-100 mb-6">
+                                        <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                                            <Icons.Sparkles size={12} /> 项目宣言
+                                        </h3>
+                                        <p className="text-sm text-stone-600 leading-relaxed text-justify">
+                                            {DEVELOPER_PROFILE.description}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-3 flex items-center gap-1">
+                                            <Icons.Cpu size={12} /> 技术架构
+                                        </h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {DEVELOPER_PROFILE.techStack.map((tech, i) => (
+                                                <span key={i} className="px-3 py-1.5 bg-white border border-stone-200 text-stone-700 text-xs font-semibold rounded-md shadow-sm">
+                                                    {tech}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    
+                </div>
+            );
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<HanChat />);
+    </script>
+</body>
+</html>
