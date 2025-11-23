@@ -107,7 +107,7 @@
             const [config, setConfig] = useState({
                 apiKey: '', 
                 modelName: 'qwen3-32b-ft-202511230210-0153',
-                apiUrl: 'https://111.228.15.128:3000/api/chat',
+                apiUrl: 'https://han-chat-proxy.ujhmn123.workers.dev/api/chat',
                 systemPrompt: '你是韩炳哲，一位jongle的当代哲学家。如果用户听不明白你的回复,请使用具体的语言进行回复。'
             });
 
@@ -160,8 +160,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'bypass-tunnel-reminder': 'true'
+                            'Accept': 'application/json'
                         },
                         body: JSON.stringify({
                             service: 'dashscope',
